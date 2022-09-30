@@ -1,0 +1,17 @@
+.imageGallery {
+    display: grid;
+    max-width: calc(100vw - 48px);
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    grid-gap: 16px;
+    margin-top: 30;
+    margin-bottom: 0;
+    padding: 0;
+    list-style: none;
+    margin-left: auto;
+    margin-right: auto;
+}
+.notificatin{
+    margin-top: 20px;
+    margin-left: 20px;
+    color: darkgray;
+}
