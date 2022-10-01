@@ -1,44 +1,43 @@
-import React, { Component } from 'react';
+import { useState } from 'react';
 import PropTypes from "prop-types";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { BsSearch } from 'react-icons/bs';
+import { useContext } from 'react';
+import { stateContext } from 'components/StateContent';
 import css from 'components/Searchbar/Searchbar.module.css'
 
+export default function Searchbar({ onChange }) {
 
-export default class Searchbar extends Component {
-    state = {
-        imageQuery: '',
-    }
+    const { changeImages, changePage } = useContext(stateContext);
 
-    handeImageChange = e => {
+    
+    const [imageQuery, setImageQuery] = useState('');
+    
+    const handeImageChange = e => {
         e.preventDefault();
-        this.setState({
-            imageQuery: e.currentTarget.value.toLowerCase()
-        })
+        setImageQuery(e.currentTarget.value.toLowerCase())
     }
 
-    resetForm = () => {
-        this.setState({
-            imageQuery: ''
-        })
+    const resetForm = () => {
+        setImageQuery('')
     }
 
-    handleSubmit = event => {
+    const handleSubmit = event => {
         event.preventDefault();
-        const{ imageQuery }=this.state 
 
         if (imageQuery.trim() === '') {
             toast.error('Введите ваш запрос');
             return
         }
 
-        this.props.onChange('imageQuery', imageQuery);
-        this.resetForm();
+        onChange(imageQuery);
+        changeImages([]);
+        changePage(1);
+        resetForm();
     }
 
-    render() {
-        const { handeImageChange, handleSubmit, state } = this;
+    
     return (
         <header className={css.searchbar}>
             <form onSubmit={handleSubmit} className={css.searchForm}>
@@ -55,13 +54,13 @@ export default class Searchbar extends Component {
                     autoComplete="off"
                     autoFocus
                     placeholder="Search images and photos"
-                    value={state.imageQuery}
+                    value={imageQuery}
                 />
             </form>
-        </header>)    
-    }
+        </header>
+    )    
 }
-
+ 
 
 Searchbar.propTypes = {
     onChange: PropTypes.func.isRequired, 

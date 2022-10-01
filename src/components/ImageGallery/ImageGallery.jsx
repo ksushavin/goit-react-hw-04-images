@@ -1,19 +1,20 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import PropTypes from "prop-types";
 import Loader from 'components/loader/Loader';
+import { useContext } from 'react';
+import { stateContext } from 'components/StateContent';
 import ImageGalleryItem from 'components/ImageGalleryItem/ImageGalleryItem';
 import fetchApi from 'components/services/imagesAPI';
 import Button from 'components/Button/Button';
 import css from 'components/ImageGallery/ImageGallery.module.css';
 
 
-export default function ImageGallery ({ query, openModal, getBigImg}) {
+export default function ImageGallery({ query, openModal, getBigImg }) {
+    
+    const { images, changeImages, page, changePage } = useContext(stateContext);
 
-    const [images, setImages] = useState([]);
     const [status, setStatus] = useState('idle');
     const [error, setError] = useState(null);
-    const [page, setPage] = useState(1);
-
 
     const usePrevious=(value)=>{
         const ref = useRef(value);
@@ -24,37 +25,30 @@ export default function ImageGallery ({ query, openModal, getBigImg}) {
         return ref.current
     }
     const prevQuery = usePrevious(query);
-    
+    const prevPage = usePrevious(page);
 
 
     const loadMore = () => {
-        setPage(prev => prev + 1);
+        changePage(prev => prev + 1);
     }
 
-    const reset = () => {
-        setImages([]);
-        setPage(1);
-    }
-
-
-    const fetchImages = (imageQuery, page, pics=images) => {
-
+    const fetchImages = useCallback((imageQuery, page) => {
         fetchApi(imageQuery, page)
-        .then(data => {
-            if (data.hits.length) {
-                setImages([...pics, ...data.hits]);
-                setStatus('resolved');
-                return
-            }
-            return Promise.reject(
-                new Error(`Немає результатів за запитом ${imageQuery}`)
-            )
-        })   
+            .then(data => {
+                if (data.hits.length) {
+                    changeImages([...images, ...data.hits]);
+                    setStatus('resolved');
+                    return
+                }
+                return Promise.reject(
+                    new Error(`Немає результатів за запитом ${imageQuery}`)
+                )
+            })
             .catch(error => {
                 setError(error);
-                setStatus('rejected');    
-        })  
-    }
+                setStatus('rejected');
+            })
+    }, [images, changeImages]);
 
 
     useEffect(() => {
@@ -62,16 +56,12 @@ export default function ImageGallery ({ query, openModal, getBigImg}) {
         if (!query) {
             return
         }
-        if (query !== prevQuery) {
-            reset();
+        if (page !== prevPage || query !== prevQuery) {
+            fetchImages(query, page);
             setStatus('pending');
-            fetchImages(query, 1, []);
             return
         }
-        fetchImages(query, page);
-        setStatus('pending');
-        //eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [query, page, prevQuery]);
+    }, [query, page, prevQuery, prevPage, fetchImages]);
 
 
 
@@ -116,3 +106,4 @@ ImageGallery.propTypes = {
     openModal: PropTypes.func, 
     getBigImg: PropTypes.func,
 }
+

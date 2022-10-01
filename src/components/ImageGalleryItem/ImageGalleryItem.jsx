@@ -5,7 +5,7 @@ import css from 'components/ImageGalleryItem/ImageGalleryItem.module.css';
 export default function ImageGalleryItem({ bigImage, getBigImg, openModal, url }) {
     
     const handleClick = () => {
-        getBigImg('bigImage', bigImage);
+        getBigImg(bigImage);
         openModal();
     }
 
